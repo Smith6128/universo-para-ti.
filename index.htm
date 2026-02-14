@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Feliz San Valentín Mi Mocosita 🌻</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Poppins:wght@300&display=swap');
+
+    html, body { margin: 0; height: 100%; background: #000; overflow: hidden; font-family: 'Poppins', sans-serif; }
+    
+    /* PANTALLA DE INICIO */
+    #welcome-screen {
+      position: fixed; inset: 0; z-index: 1000;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: radial-gradient(circle, #0a001a 0%, #000 100%);
+      transition: opacity 1.5s ease;
+      text-align: center; color: white; padding: 20px;
+    }
+
+    #welcome-screen img {
+      max-width: 80%; max-height: 35vh; border-radius: 20px;
+      margin-bottom: 20px; box-shadow: 0 0 30px rgba(185, 160, 255, 0.4);
+      object-fit: cover;
+    }
+
+    .poem-container p { font-style: italic; line-height: 1.5; font-size: 1rem; color: #e0d0ff; white-space: pre-line; margin-bottom: 20px; }
+
+    /* MODAL INTERACTIVO */
+    #question-modal {
+      position: fixed; inset: 0; z-index: 2000;
+      background: rgba(0,0,0,0.95);
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .modal-content {
+      background: #1a0b2e; border: 2px solid #b9a0ff; padding: 40px;
+      border-radius: 25px; text-align: center; width: 85%; max-width: 450px;
+      box-shadow: 0 0 50px rgba(185, 160, 255, 0.2);
+    }
+    .btn-group { margin-top: 40px; height: 100px; position: relative; width: 100%; }
+    
+    .yes-btn {
+      padding: 15px 40px; border-radius: 50px; border: none; cursor: pointer;
+      background: #4CAF50; color: white; font-weight: bold; font-size: 1.3rem;
+      transition: transform 0.3s;
+    }
+    .no-btn {
+      padding: 10px 25px; border-radius: 50px; border: none; cursor: pointer;
+      background: #f44336; color: white; font-weight: bold;
+      position: absolute; left: 50%; transform: translateX(50%);
+      transition: all 0.2s ease-out; /* Deslizamiento suave */
+    }
+
+    /* MENSAJE DE GRACIAS */
+    #thanks-msg {
+      position: fixed; inset: 0; z-index: 3000;
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.8); color: #fff; text-align: center;
+    }
+    #thanks-msg h2 { font-family: 'Dancing Script', cursive; font-size: 2.5rem; color: #ffeb3b; text-shadow: 0 0 20px rgba(255,235,59,0.5); }
+
+    /* GIRASOLES */
+    .sunflower {
+      position: fixed; top: -60px; z-index: 2500;
+      font-size: 40px; pointer-events: none;
+      animation: fall linear forwards;
+    }
+    @keyframes fall { to { transform: translateY(110vh) rotate(540deg); } }
+
+    /* UI GALAXIA ORIGINAL */
+    #galaxy-ui { display:none; }
+    #galaxy-canvas { position: fixed; inset: 0; width: 100%; height: 100%; }
+    .pill { position: fixed; top: 10px; left: 50%; transform: translateX(-50%); padding: 6px 15px; border-radius: 999px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 12px; z-index: 10; }
+    .player { position: fixed; left: 10px; right: 10px; bottom: 10px; display: flex; gap: 8px; align-items: center; background: rgba(20,15,35,0.5); border-radius: 12px; padding: 8px; backdrop-filter: blur(6px); color: #fff; z-index: 20; border: 1px solid rgba(255,255,255,0.1); }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+<div id="welcome-screen">
+  <img src="c3b88c6b-1cf5-44cb-b45f-66cec35f8674.jpeg" alt="Nuestro Amor"> 
+  <div class="poem-container">
+    <p>
+      Si las estrellas pudieran hablar,
+      contarían lo mucho que te suelo pensar.
+      Pero como el silencio es su mejor compañía,
+      he creado este universo donde tú eres mi guía.
+
+      Te amo más allá de lo que el ojo alcanza a ver,
+      en esta galaxia que hoy te vengo a ofrecer.
+
+      Entrégame tus labios rotos los quiero besar,
+      los quiero curar...
+      En este universo infinito, tú eres mi única verdad.
+    </p>
+  </div>
+  <button class="yes-btn" onclick="document.getElementById('question-modal').style.display='flex'">Entrar ✨</button>
+</div>
+
+<div id="question-modal">
+  <div class="modal-content">
+    <h2 style="color: #d28cff; font-family: 'Dancing Script'; font-size: 2.5rem;">¿Aceptas ser mi San Valentín? 🌻</h2>
+    <div class="btn-group">
+      <button class="yes-btn" id="yes-btn">¡SÍ! ❤️</button>
+      <button class="no-btn" id="no-btn">No</button>
+    </div>
+  </div>
+</div>
+
+<div id="thanks-msg">
+  <h2>Gracias por aceptar ser mi San Valentín mi niña ❤️<br> Eres mi universo...</h2>
+</div>
+
+<div id="galaxy-ui">
+  <canvas id="galaxy-canvas"></canvas>
+  <div class="pill">Te Amo Mucho niña de mis ojos, Feliz San Valentin mi mocosita ♾️♥️ </div>
+  <div class="player">
+    <button id="playBtn" style="background:none; border:1px solid #fff; color:#fff; border-radius:5px; cursor:pointer;">▶︎</button>
+    <span style="font-size:12px;">Sonando: <b>Zoé - Labios Rotos</b> 🎶</span>
+    <audio id="audio" loop>
+      <source src="c:\Users\HP\Documents\labios_rotos.mp3.mpeg" type="audio/mpeg">
+    </audio>
+  </div>
+</div>
+
+<script>
+(function(){
+  const noBtn = document.getElementById('no-btn');
+  const yesBtn = document.getElementById('yes-btn');
+  const thanksMsg = document.getElementById('thanks-msg');
+  let noScale = 1;
+
+  // LÓGICA BOTÓN "NO" SE DESLIZA Y ACHICA
+  const moveNo = () => {
+    const x = Math.random() * (window.innerWidth - 120);
+    const y = Math.random() * (window.innerHeight - 50);
+    noScale -= 0.1; // Se hace más pequeño
+    if(noScale < 0.2) noScale = 0.2; // Límite de pequeñez
+    
+    noBtn.style.position = 'fixed';
+    noBtn.style.left = x + 'px';
+    noBtn.style.top = y + 'px';
+    noBtn.style.transform = `scale(${noScale})`;
+  };
+
+  noBtn.onmouseover = moveNo;
+  noBtn.onclick = moveNo;
+
+  // LÓGICA BOTÓN "SÍ"
+  yesBtn.onclick = () => {
+    document.getElementById('question-modal').style.display = 'none';
+    thanksMsg.style.display = 'flex';
+    createSunflowerRain();
+    
+    setTimeout(() => {
+      thanksMsg.style.opacity = '0';
+      document.getElementById('welcome-screen').style.display = 'none';
+      setTimeout(() => {
+        thanksMsg.style.display = 'none';
+        document.getElementById('galaxy-ui').style.display = 'block';
+        document.getElementById('audio').play().catch(() => {});
+        initOriginalEngine();
+      }, 1000);
+    }, 4000); // 4 segundos de mensaje y girasoles
+  };
+
+  function createSunflowerRain() {
+    for(let i=0; i<80; i++) {
+      setTimeout(() => {
+        const flower = document.createElement('div');
+        flower.className = 'sunflower';
+        flower.innerHTML = '🌻';
+        flower.style.left = Math.random() * 100 + 'vw';
+        flower.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        document.body.appendChild(flower);
+        setTimeout(() => flower.remove(), 4000);
+      }, i * 60);
+    }
+  }
+
+  // --- TU CÓDIGO FUENTE DEL UNIVERSO (SIN CAMBIOS) ---
+  function initOriginalEngine() {
+    const canvas = document.getElementById('galaxy-canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:false });
+    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio||1));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000);
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true; controls.dampingFactor = 0.05;
+    camera.position.set(0, 22, 110);
+
+    // Textura estrellas
+    function makePrettyStarTexture(size=1024, count=2600) {
+      const c = document.createElement('canvas'); c.width = c.height = size;
+      const g = c.getContext('2d');
+      const r = size/2;
+      const bg = g.createRadialGradient(r,r, r*0.2, r,r, r);
+      bg.addColorStop(0,'#050010'); bg.addColorStop(1,'#000000');
+      g.fillStyle = bg; g.fillRect(0,0,size,size);
+      for (let i=0;i<count;i++) {
+        const x = Math.random()*size, y = Math.random()*size;
+        const glow = g.createRadialGradient(x,y,0, x,y, Math.random()*2+1.5);
+        glow.addColorStop(0, 'rgba(255,255,255,0.7)');
+        glow.addColorStop(1, 'rgba(180,190,255,0)');
+        g.fillStyle = glow; g.beginPath(); g.arc(x,y, Math.random()*1+0.5, 0, Math.PI*2); g.fill();
+      }
+      return new THREE.CanvasTexture(c);
+    }
+
+    const starTex = makePrettyStarTexture();
+    starTex.wrapS = starTex.wrapT = THREE.RepeatWrapping;
+    const bg = new THREE.Mesh(new THREE.SphereGeometry(600, 64, 64), new THREE.MeshBasicMaterial({ map: starTex, side: THREE.BackSide }));
+    scene.add(bg);
+
+    const galaxy = new THREE.Group(); scene.add(galaxy);
+    const phrases = ["Pinchecha ✨", " Hermosa ♥️", "Mi Bebe", "Mi Cielito 🌌", "Hermosota ✨", "Mi Infinito ♾️", "Mi Todo", "Me Encantas 🥰", " Perla 💫", "Te Amo♥️", "Mi Canción Favorita 🎶", "Unica 😊", "Mi Reina 👑", "Mi Amor", "Mi Mundo", "Mi Luz 🌠", "Mi Niña", "Mi Tesoro♥️", "Mi Paz", "Mi Eterna", "Mi Sueño", "Mi Pensamiento Favorito", "Mi Bombom", "Mi Diosa", "Te admiro mucho", "Eres una mujer Mravillosa", "Mi mocosita hermosa", "Mi niña chiquita", "Te Amo Infinitamente mi amor eterno ♾️"];
+    
+    function makeTextTexture(text){
+      const c=document.createElement('canvas'); c.width=1024; c.height=128;
+      const g=c.getContext('2d'); g.font='800 48px Arial'; g.textAlign='center'; g.textBaseline='middle';
+      g.shadowColor='rgba(210,140,255,0.95)'; g.shadowBlur=24;
+      g.fillStyle='rgba(255,240,255,0.98)'; g.fillText(text,512,64);
+      return new THREE.CanvasTexture(c);
+    }
+
+    const arms = 5, radius = 82, phraseCount = 180;
+    for(let i=0;i<phraseCount;i++){ 
+      const spr=new THREE.Sprite(new THREE.SpriteMaterial({ map:makeTextTexture(phrases[i%phrases.length]), transparent:true, depthWrite:false }));
+      const perArm=phraseCount/arms; const ang=(i%perArm)*(Math.PI*2/perArm);
+      const armAng=Math.floor(i/perArm)*(Math.PI*2/arms);
+      const dist=Math.pow(i/phraseCount,0.72)*radius;
+      const x=Math.cos(ang+armAng)*dist, z=Math.sin(ang+armAng)*dist, y=(Math.random()-0.5)*22*Math.pow(1-(dist/radius),2);
+      spr.position.set(x,y,z); spr.scale.set(20,2.6,1); galaxy.add(spr);
+    }
+
+    const starCount=8000, geom=new THREE.BufferGeometry(), pos=new Float32Array(starCount*3);
+    for(let i=0;i<starCount;i++){ 
+      const ang=Math.random()*Math.PI*2, dist=Math.random()*radius*1.15;
+      pos[i*3]=Math.cos(ang)*dist; pos[i*3+1]=(Math.random()-0.5)*36*Math.pow(1-dist/radius,1.5); pos[i*3+2]=Math.sin(ang)*dist; 
+    }
+    geom.setAttribute('position', new THREE.BufferAttribute(pos,3));
+    galaxy.add(new THREE.Points(geom, new THREE.PointsMaterial({ color:0xffffff, size:0.28, transparent:true, opacity:0.65, blending:THREE.AdditiveBlending })));
+
+    const core = new THREE.Mesh(new THREE.SphereGeometry(12, 64, 64), new THREE.MeshBasicMaterial({ color: 0x090012 }));
+    scene.add(core);
+
+    const photonRing=new THREE.Mesh(new THREE.RingGeometry(12.6, 14.1, 128), new THREE.MeshBasicMaterial({ color:0xEAAEFF, transparent:true, opacity:0.95, side:THREE.DoubleSide }));
+    photonRing.rotation.x=-Math.PI/2; scene.add(photonRing);
+
+    function makeHaloTexture(){
+      const c=document.createElement('canvas'); c.width=c.height=1024; const g=c.getContext('2d');
+      const grd=g.createRadialGradient(512,512,460, 512,512,512);
+      grd.addColorStop(0,'rgba(255,200,240,0.45)'); grd.addColorStop(1,'rgba(0,0,0,0)');
+      g.fillStyle=grd; g.fillRect(0,0,1024,1024); return new THREE.CanvasTexture(c);
+    }
+    const halo=new THREE.Mesh(new THREE.PlaneGeometry(320,320), new THREE.MeshBasicMaterial({ map:makeHaloTexture(), transparent:true, depthWrite:false, blending:THREE.AdditiveBlending }));
+    halo.rotation.x=-Math.PI/2; scene.add(halo);
+
+    function animate(){
+      requestAnimationFrame(animate);
+      const t = performance.now()*0.001;
+      starTex.offset.set((t * 0.01) % 1, 0);
+      galaxy.rotation.y = t * 0.05;
+      photonRing.rotation.z = t * 0.18;
+      controls.update();
+      renderer.render(scene, camera);
+    } animate();
+  }
+
+  // BOTÓN PLAY/PAUSE
+  document.getElementById('playBtn').onclick = function(){
+    const a = document.getElementById('audio');
+    if(a.paused){ a.play(); this.textContent='⏸︎'; }
+    else { a.pause(); this.textContent='▶︎'; }
+  };
+})();
+</script>
+</body>
+</html>
